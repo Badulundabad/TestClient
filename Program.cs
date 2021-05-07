@@ -15,20 +15,27 @@ namespace ConsoleApp1
 {
     class Program
     {
+        private static NetworkStream stream = null;
         static void Main(string[] args)
         {
-            SendFiles(Connect());
+            Connect();
+            SendFiles();
             Console.ReadLine();
         }
 
-        private static NetworkStream Connect()
+        private static void Test()
+        {
+            Byte[] file = File.ReadAllBytes(@"C:\Users\Badulundabad\Desktop\Smite\gear.png");
+
+        }
+
+        private static void Connect()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.53"), 8005));
-            NetworkStream stream = new NetworkStream(socket);
-            return stream;
+            socket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.53"), 8321));
+            stream = new NetworkStream(socket);
         }
-        private static void SendFiles(Stream stream)
+        private static void SendFiles()
         {
             Byte[] file = File.ReadAllBytes(@"C:\Users\Badulundabad\Desktop\Smite\tiger.bmp");
             Byte[] file2 = File.ReadAllBytes(@"C:\Users\Badulundabad\Desktop\Smite\boar.png");
@@ -39,26 +46,25 @@ namespace ConsoleApp1
             Byte[] file7 = File.ReadAllBytes(@"C:\Users\Badulundabad\Desktop\Smite\Radmin.exe");
             Byte[] file8 = File.ReadAllBytes(@"C:\Users\Badulundabad\Desktop\Smite\Notion.exe");
 
-            Console.Write(SendBytes(stream, file) + "\n");
-            Console.Write(SendBytes(stream, file2) + "\n");
-            Console.Write(SendBytes(stream, file3) + "\n");
-            Console.Write(SendBytes(stream, file4) + "\n");
-            Console.Write(SendBytes(stream, file5) + "\n");
-            Console.Write(SendBytes(stream, file6) + "\n");
-            Console.Write(SendBytes(stream, file7) + "\n");
-            Console.Write(SendBytes(stream, file8) + "\n");
+            //Console.Write(SendBytes(stream, file) + "\n");
+            //Console.Write(SendBytes(stream, file2) + "\n");
+            //Console.Write(SendBytes(stream, file3) + "\n");
+            //Console.Write(SendBytes(stream, file4) + "\n");
+            //Console.Write(SendBytes(stream, file5) + "\n");
+            //Console.Write(SendBytes(file5) + "\n");
+            //Console.Write(SendBytes(stream, file7) + "\n");
+            SendBytes(file8);
         }
-        private static string SendBytes(Stream stream, Byte[] buffer)
+        private static void SendBytes(Byte[] buffer)
         {
-            String json = "#" + JsonSerializer.Serialize(buffer) + "#";
+            Console.WriteLine("started to send");
+            String input = JsonSerializer.Serialize(buffer);
+            String json = "#" + input + "#";
             Byte[] data = Encoding.UTF8.GetBytes(json);
             Byte[] sizeBytes = BitConverter.GetBytes(data.Length);
 
-            Int32 timeout = data.Length / 650;
             stream.Write(sizeBytes, 0, 4);
             stream.Write(data, 0, data.Length);
-            Thread.Sleep(timeout);
-            return $"\nsent {data.Length} bytes";
         }
         private static String GetOperationJson(Byte[] data)
         {
